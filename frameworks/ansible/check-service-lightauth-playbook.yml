@@ -1,0 +1,19 @@
+---
+- hosts: cluster
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+
+  tasks:
+    - name: Download status page
+      uri:
+        url: http://localhost:3030/api/v2/authentication/statistics
+        method: GET
+        headers:
+          Content-Type: "application/json"
+        return_content: no
+      register: statusresponse
+
+    - name: Fail if uptime is not in the response contenst
+      fail:
+      when: "'uptime' not in statusresponse.content"
