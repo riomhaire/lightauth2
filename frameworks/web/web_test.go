@@ -149,6 +149,74 @@ func TestValidateHandler(t *testing.T) {
 	}
 }
 
+func TestTokenDecodeHandler(t *testing.T) {
+	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
+	// pass 'nil' as the third parameter.
+	body := []byte("{\"username\":\"test\",\"password\":\"secret\"}")
+	req, err := http.NewRequest("POST", "/authenticate", bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	rr := httptest.NewRecorder()
+	registry := createTestRegistry()
+	restAPI := NewRestAPI(&registry)
+	handler := http.HandlerFunc(restAPI.HandleAuthenticate)
+
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	authenticateResponse := AuthenticateResponse{}
+	err = json.NewDecoder(rr.Body).Decode(&authenticateResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Check we have a popoulated token field
+	if authenticateResponse.Token == "" || len(authenticateResponse.Token) < 10 {
+		t.Fatal(errors.New("token missing or invalid"))
+	}
+
+	// OK Decode token
+	authorization := fmt.Sprintf("Bearer %s", authenticateResponse.Token)
+	rr = httptest.NewRecorder()
+	handler = http.HandlerFunc(restAPI.HandleTokenDecode)
+	req, _ = http.NewRequest("GET", "/api/v2/session/decoder", nil)
+	req.Header.Set("Authorization", authorization)
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+
+func TestTokenDecodeHandlerNoBearer(t *testing.T) {
+	// OK Decode token no auth
+	registry := createTestRegistry()
+	restAPI := NewRestAPI(&registry)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(restAPI.HandleTokenDecode)
+	req, _ := http.NewRequest("GET", "/api/v2/session/decoder", nil)
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusUnauthorized {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+
 func TestValidateNoAuthorizationHeaderHandler(t *testing.T) {
 	// OK Validate
 	rr := httptest.NewRecorder()
