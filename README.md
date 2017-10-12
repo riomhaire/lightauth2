@@ -1,4 +1,4 @@
-# lightauth2
+# LightAuth2
 
 This project *SHOULD NOT* be used in production for various reasons. This project is one of our many experiments in learning GO and in this case [clean architecture]( https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html ) , REST, Crypto and JWT for a demo Authentication and Session application. We prefer to learn using something more than the usual 'hello world'. This is a re-write of https://github.com/riomhaire/lightauth .
 
@@ -301,3 +301,23 @@ openssl ecparam -genkey -name secp384r1 -out server.key
 openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
 ```
 
+## Performance
+The following graphs are based on running the enclosed JMeter script against LightAuth2 deployed within six nodes of a [ Raspberry PI cluster ]( http://www.riomhaire.com/post/theign-post/ ) fronted by a Linkerd router.
+
+### Transaction Summary
+![Transactions Summary](docs/stats/20171011/summary.png)
+
+### Transactions Per Second
+![Transactions Per Second](docs/stats/20171011/tps.png)
+
+### Response Distributions
+![Response Distributions](docs/stats/20171011/response-distributions.png)
+
+### Response Percentiles
+![Response Percentiles](docs/stats/20171011/response-percentiles.png)
+
+### Latencies
+![Latencies](docs/stats/20171011/latencies.png)
+
+### Profiling
+![Profiling](docs/stats/20171011/profiling.png)
