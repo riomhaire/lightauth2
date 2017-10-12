@@ -38,6 +38,7 @@ clean:
 	@go clean
 	@rm -f lightauth2 lightauthsession lightauthuser
 	@rm -f coverage-*.html
+	@find . -name "debug.test" -exec rm -f {} \;
 
 everything: clean build test profile  
 	@echo Done

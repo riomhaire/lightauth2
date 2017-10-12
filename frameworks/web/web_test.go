@@ -318,3 +318,32 @@ func TestStatisticsHandler(t *testing.T) {
 	}
 
 }
+
+func TestHostAppender(t *testing.T) {
+	// Check that extra headers are added
+	rr := httptest.NewRecorder()
+	api := RestAPI{}
+	api.AddWorkerHeader(rr, nil, nil)
+	if len(rr.Header().Get("X-WORKER")) == 0 {
+		t.Fail()
+	}
+	// Check that non-existent header not there
+	if len(rr.Header().Get("X-WORKER2")) != 0 {
+		t.Fail()
+	}
+}
+
+func TestVersionAppender(t *testing.T) {
+	// Check that extra headers are added
+	rr := httptest.NewRecorder()
+	registry := createTestRegistry()
+	api := NewRestAPI(&registry)
+	api.AddWorkerVersion(rr, nil, nil)
+	if len(rr.Header().Get("X-WORKER-VERSION")) == 0 {
+		t.Fail()
+	}
+	// Check that non-existent header not there
+	if len(rr.Header().Get("X-WORKER2-VERSION")) != 0 {
+		t.Fail()
+	}
+}
