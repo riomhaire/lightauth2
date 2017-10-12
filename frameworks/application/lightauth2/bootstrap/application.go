@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.0"
+const VERSION = "LightAuth2 Version 1.1"
 
 type Application struct {
 	registry *usecases.Registry
@@ -73,6 +73,8 @@ func (a *Application) Initialize() {
 
 	// Add Middleware
 	negroni.Use(restAPI.Statistics)
+	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
+	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
 	negroni.UseHandler(mux)
 
 	// Stats runs across all instances
