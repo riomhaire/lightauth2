@@ -19,8 +19,8 @@ func createTestRegistry() usecases.Registry {
 	logger := frameworks.ConsoleLogger{}
 
 	database := frameworks.NewStringDatabaseInteractor()
-	database.Create(entities.User{"test", "939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6", true, []string{"user"}})
-	database.Create(entities.User{"admin", "50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba", true, []string{"admin"}})
+	database.Create(entities.User{"test", "939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6", true, []string{"user"}, "claim1", "claim2"})
+	database.Create(entities.User{"admin", "50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba", true, []string{"admin"}, "claim1", "claim2"})
 
 	configuration := usecases.Configuration{}
 	configuration.SigningSecret = "secret"

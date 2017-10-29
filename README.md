@@ -35,15 +35,15 @@ The best way if you just want run is to build and install the apps:
 The 'users.csv' file is read from the folder where the 'lightauth2' server is executed. This is a simple CSV file where the 1st line is a header consisting of:
 
 ```csv
-username,password,enabled,roles
+username,password,enabled,roles,claim1,claim2
 
 ```
 An example is:
 
 ```csv
-username,password,enabled,roles
-test,939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6,true,none
-admin,50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba,true,admin
+username,password,enabled,roles,claim1,claim2
+test,939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6,true,none,8f0daa02-4f89-4ad8-9db9-d1d8bcc60f07,d70e6e06-a8b7-4daf-a2d0-476acd396e82
+admin,50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba,true,admin:api,83df72c5-f3e7-47a4-bd1b-a8d7e8f6db0f,90a08fec-783f-48b0-b2ac-325f71f6ebfb
 
 ```
 
@@ -137,7 +137,7 @@ $ lightauth2 -usersFile ../../ansible/users.csv
 2017/10/11 18:45:05 [INFO] Initializing
 2017/10/11 18:45:05 Reading User Database ../../ansible/users.csv
 2017/10/11 18:45:05 #Number of users = 2
-2017/10/11 18:45:05 [INFO] Running LightAuth2 Version 1.0
+2017/10/11 18:45:05 [INFO] Running LightAuth2 Version 1.2
 2017/10/11 18:45:05 [INFO]
 CONFIGURATION
           SigningSecret : 'secret'
@@ -166,7 +166,9 @@ Content-Type should be "application/json"
 
 ### Authenticate/Login.
 
-Example request POST ("http://somehost:3030/api/v2/authentication"):
+There are two flavours of this - Authenticate via password and Authenticate via claims,
+
+Example request for authenticate via password POST ("http://somehost:3030/api/v2/authentication"):
 
 ```json
 {
@@ -196,6 +198,18 @@ Date: Wed, 11 Oct 2017 17:49:59 GMT
 Content-Length: 22
 
 ```
+
+Example request for authenticate via claims POST ("http://somehost:3030/api/v2/authentication"):
+
+```json
+{
+	"username":"vader",
+      "claims": ["wef33rfefefef","3535wefw4ff3"]
+}
+```
+
+Claims are information about a user which can be used to identify them. Strictly speaking a password is a claim - but the common usage is the user/password hence the via password route above. In this case a claim could be a registered 'QRCode' or 'Iris Scan Info' etc. The response and token returned is consistent across all calls.
+
 
 ### Verify a session token.
 
@@ -320,4 +334,4 @@ The following graphs are based on running the enclosed JMeter script against Lig
 ![Latencies](docs/stats/20171011/latencies.png)
 
 ### Profiling
-![Profiling](docs/stats/20171011/profiling.png)
+![Profiling](docs/stats/20171029/profiling.png)

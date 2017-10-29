@@ -12,6 +12,15 @@ import (
 	"github.com/riomhaire/lightauth2/usecases"
 )
 
+const (
+	usernameField = 0
+	passwordField = 1
+	enabledField  = 2
+	rolesField    = 3
+	claim1Field   = 4
+	claim2Field   = 5
+)
+
 // This is a test implementation for test purposes
 type CSVReaderDatabaseInteractor struct {
 	registry *usecases.Registry
@@ -69,13 +78,16 @@ func loadUsers(filename string) (map[string]entities.User, error) {
 	for index, row := range records {
 		if index > 0 && len(row) > 0 {
 			user := entities.User{}
-			user.Username = row[0]
-			user.Password = row[1]
+			user.Username = row[usernameField]
+			user.Password = row[passwordField]
 
-			v, _ := strconv.ParseBool(row[2])
+			v, _ := strconv.ParseBool(row[enabledField])
 			user.Enabled = v
-			roles := strings.Split(row[3], ":")
+			roles := strings.Split(row[rolesField], ":")
 			user.Roles = roles
+			user.Claim1 = row[claim1Field]
+			user.Claim2 = row[claim2Field]
+
 			// Add
 			users[user.Username] = user
 		}

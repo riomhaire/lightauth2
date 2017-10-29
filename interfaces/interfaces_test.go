@@ -23,8 +23,7 @@ func (d TestLogger) Log(level, message string) {
 func TestSuccessfulAuthenticate(t *testing.T) {
 	registry := createTestRegistry()
 
-	claims := []string{"secret"}
-	token, err := registry.AuthenticateInteractor.Authenticate("test", claims)
+	token, err := registry.AuthenticateInteractor.Authenticate("test", "secret")
 	if err != nil || len(token) == 0 {
 		t.Fail()
 	}
@@ -33,8 +32,7 @@ func TestSuccessfulAuthenticate(t *testing.T) {
 func TestFailAuthenticate(t *testing.T) {
 	registry := createTestRegistry()
 
-	claims := []string{"bad"}
-	_, err := registry.AuthenticateInteractor.Authenticate("test", claims)
+	_, err := registry.AuthenticateInteractor.Authenticate("test", "bad")
 	if err == nil {
 		t.Fail()
 	}
@@ -44,8 +42,81 @@ func TestFailAuthenticate(t *testing.T) {
 func TestFailAuthenticateUnknownUser(t *testing.T) {
 	registry := createTestRegistry()
 
-	claims := []string{"bad"}
-	_, err := registry.AuthenticateInteractor.Authenticate("unknown", claims)
+	_, err := registry.AuthenticateInteractor.Authenticate("unknown", "bad")
+	if err == nil {
+		t.Fail()
+	}
+	if err.Error() != "Unknown user" {
+		t.Fail()
+	}
+
+}
+
+func TestFailAuthenticateClaimsUnknownClaim(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{"known"}
+	_, err := registry.AuthenticateInteractor.AuthenticateClaims("test", claims)
+	if err == nil {
+		t.Fail()
+	}
+
+}
+
+func TestFailAuthenticateClaimsSingleClaim(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{"claim1"}
+	token, err := registry.AuthenticateInteractor.AuthenticateClaims("test", claims)
+	if err != nil || len(token) == 0 {
+		t.Fail()
+	}
+
+}
+
+func TestFailAuthenticateClaimsTwoClaim(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{"claim1", "claim2"}
+	token, err := registry.AuthenticateInteractor.AuthenticateClaims("test", claims)
+	if err != nil || len(token) == 0 {
+		t.Fail()
+	}
+
+}
+
+func TestFailAuthenticateClaimsSingleClaimNoUser(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{"claim1"}
+	_, err := registry.AuthenticateInteractor.AuthenticateClaims("notest", claims)
+	if err == nil {
+		t.Fail()
+	}
+	if err.Error() != "Unknown user" {
+		t.Fail()
+	}
+
+}
+
+func TestFailAuthenticateClaimsNoClaims(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{}
+	_, err := registry.AuthenticateInteractor.AuthenticateClaims("test", claims)
+	if err == nil {
+		t.Fail()
+	}
+	if err.Error() != "No Claims" {
+		t.Fail()
+	}
+}
+
+func TestFailAuthenticateClaimsUnknownClaim2(t *testing.T) {
+	registry := createTestRegistry()
+
+	claims := []string{"claim1", "unknown"}
+	_, err := registry.AuthenticateInteractor.AuthenticateClaims("test", claims)
 	if err == nil {
 		t.Fail()
 	}
@@ -69,8 +140,7 @@ func TestSuccessValidate(t *testing.T) {
 	registry := createTestRegistry()
 
 	// Create token
-	claims := []string{"secret"}
-	token, err := registry.AuthenticateInteractor.Authenticate("test", claims)
+	token, err := registry.AuthenticateInteractor.Authenticate("test", "secret")
 	if err != nil || len(token) == 0 {
 		t.Fail()
 	}
@@ -86,8 +156,7 @@ func TestSuccessDecode(t *testing.T) {
 	registry := createTestRegistry()
 
 	// Create token
-	claims := []string{"secret"}
-	token, err := registry.AuthenticateInteractor.Authenticate("test", claims)
+	token, err := registry.AuthenticateInteractor.Authenticate("test", "secret")
 	if err != nil || len(token) == 0 {
 		t.Fail()
 	}
@@ -116,8 +185,8 @@ func createTestRegistry() usecases.Registry {
 	logger := TestLogger{}
 
 	database := NewTestDatabaseInteractor()
-	database.Create(entities.User{"test", "939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6", true, []string{"user"}})
-	database.Create(entities.User{"admin", "50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba", true, []string{"admin"}})
+	database.Create(entities.User{"test", "939c1f673b7f5f5c991b4d4160642e72880e783ba4d7b04da260392f855214a6", true, []string{"user"}, "claim1", "claim2"})
+	database.Create(entities.User{"admin", "50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba", true, []string{"admin"}, "claim1", "claim2"})
 
 	configuration := usecases.Configuration{}
 	configuration.TokenTimeout = 3600

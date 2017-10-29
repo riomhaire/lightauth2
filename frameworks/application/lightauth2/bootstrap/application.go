@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.1"
+const VERSION = "LightAuth2 Version 1.2"
 
 type Application struct {
 	registry *usecases.Registry

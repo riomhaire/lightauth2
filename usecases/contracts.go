@@ -5,7 +5,8 @@ import "github.com/riomhaire/lightauth2/entities"
 // This file contains the various interface contracts used by the system.
 
 type AuthenticateInteractor interface {
-	Authenticate(user string, claims []string) (string, error)
+	Authenticate(user string, password string) (string, error)
+	AuthenticateClaims(user string, claims []string) (string, error)
 }
 
 type Logger interface {
