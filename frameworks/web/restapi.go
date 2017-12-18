@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/Shopify/sarama"
 	"github.com/riomhaire/lightauth2/usecases"
 	"github.com/thoas/stats"
 	"github.com/urfave/negroni"
@@ -9,9 +10,12 @@ import (
 var bearerPrefix = "bearer "
 
 type RestAPI struct {
-	Registry   *usecases.Registry
-	Statistics *stats.Stats
-	Negroni    *negroni.Negroni
+	Registry         *usecases.Registry
+	Statistics       *stats.Stats
+	Negroni          *negroni.Negroni
+	Producer         sarama.SyncProducer
+	KafkaInitialized bool
+	IPAddress        string
 }
 
 func NewRestAPI(registry *usecases.Registry) RestAPI {

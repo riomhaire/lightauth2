@@ -28,3 +28,18 @@ func (r *RestAPI) AddWorkerVersion(rw http.ResponseWriter, req *http.Request, ne
 		next(rw, req)
 	}
 }
+
+// AddWorkerHeader - adds coors header
+func (r *RestAPI) AddCoorsHeader(rw http.ResponseWriter, request *http.Request, next http.HandlerFunc) {
+
+	//rw.Header().Add("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	rw.Header().Add("Access-Control-Allow-Credentials", "true")
+	rw.Header().Add("Access-Control-Allow-Origin", "*")
+	rw.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+	rw.Header().Add("Access-Control-Max-Age", "3600")
+	rw.Header().Add("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me")
+
+	if next != nil {
+		next(rw, request)
+	}
+}

@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.2"
+const VERSION = "LightAuth2 Version 1.4"
 
 type Application struct {
 	registry *usecases.Registry
@@ -34,8 +34,17 @@ func (a *Application) Initialize() {
 	serverKey := flag.String("serverKey", "server.key", "Server Key File")
 
 	port := flag.Int("port", 3030, "Port to use")
+
+	enableKafkaLogging := flag.Bool("kafkaLogging", false, "Enable logging to Kafka")
+	enableKafkaMetrics := flag.Bool("kafkaMetrics", false, "Enable metrics to Kafka")
+	kafkaHost := flag.String("kafkaHost", "localhost", "Where Kafka is running")
+	kafkaPort := flag.Int("kafkaPort", 9092, "Port where Kafka is listening")
+	kafkaLoggingTopic := flag.String("kafkaLoggingTopic", "lightauth-logging", "Logging topic")
+	kafkaMetricsTopic := flag.String("kafkaMetricsTopic", "lightauth-metrics", "Metrics topic")
+
 	flag.Parse()
 	// Set in config
+	configuration.Application = "Authentication"
 	configuration.Version = VERSION
 	configuration.SigningSecret = *sessionSecret
 	configuration.TokenTimeout = *sessionPeriod
@@ -45,11 +54,22 @@ func (a *Application) Initialize() {
 	configuration.SSLCertificate = *serverCert
 	configuration.SSLKey = *serverKey
 	configuration.Port = *port
+	configuration.KafkaLogging = *enableKafkaLogging
+	configuration.KafkaMetrics = *enableKafkaMetrics
+	configuration.KafkaHost = *kafkaHost
+	configuration.KafkaPort = *kafkaPort
+	configuration.KafkaLoggingTopic = *kafkaLoggingTopic
+	configuration.KafkaMetricsTopic = *kafkaMetricsTopic
 
 	registry := usecases.Registry{}
 	a.registry = &registry
 	registry.Configuration = configuration
-	registry.Logger = logger
+	if configuration.KafkaLogging {
+		registry.Logger = frameworks.NewKafkaLogger(configuration.KafkaHost, configuration.KafkaPort, configuration.KafkaLoggingTopic)
+		logger.Log("Configuration", fmt.Sprintf("Using Kafa for logging. Server [%v:%v] Topic [%v]", configuration.KafkaHost, configuration.KafkaPort, configuration.KafkaLoggingTopic))
+	} else {
+		registry.Logger = logger
+	}
 	database := frameworks.NewCSVReaderDatabaseInteractor(&registry)
 
 	registry.StorageInteractor = database
@@ -72,9 +92,13 @@ func (a *Application) Initialize() {
 	mux.HandleFunc("/api/v2/authentication/health", restAPI.HandleHealth)
 
 	// Add Middleware
+	if configuration.KafkaMetrics {
+		negroni.UseFunc(restAPI.KafkaRecorder) // Record call in kafka
+	}
 	negroni.Use(restAPI.Statistics)
 	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
 	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
+	negroni.UseFunc(restAPI.AddCoorsHeader)   // Add coors
 	negroni.UseHandler(mux)
 
 	// Stats runs across all instances
