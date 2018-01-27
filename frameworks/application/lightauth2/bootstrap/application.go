@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.4"
+const VERSION = "LightAuth2 Version 1.5"
 
 type Application struct {
 	registry *usecases.Registry
@@ -88,8 +88,10 @@ func (a *Application) Initialize() {
 	mux.HandleFunc("/api/v2/authentication", restAPI.HandleAuthenticate)
 	mux.HandleFunc("/api/v2/session", restAPI.HandleValidate)
 	mux.HandleFunc("/api/v2/session/decoder", restAPI.HandleTokenDecode)
-	mux.HandleFunc("/api/v2/authentication/statistics", restAPI.HandleStatistics)
+	mux.HandleFunc("/api/v2/authentication/metrics", restAPI.HandleStatistics)
+	mux.HandleFunc("/metrics", restAPI.HandleStatistics)
 	mux.HandleFunc("/api/v2/authentication/health", restAPI.HandleHealth)
+	mux.HandleFunc("/health", restAPI.HandleHealth)
 
 	// Add Middleware
 	if configuration.KafkaMetrics {
