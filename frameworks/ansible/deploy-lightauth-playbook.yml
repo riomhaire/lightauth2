@@ -30,4 +30,4 @@
 
     # Start and enable the lightauth service 
     - name: Start and enable the lightauth service
-      service: name=lightauth2 enabled=yes state=started
+      service: name=lightauth2 enabled=yes state=restarted
