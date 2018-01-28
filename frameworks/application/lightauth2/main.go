@@ -26,7 +26,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Println("Shuting DOwn")
+		log.Println("Shutting Down")
 		// pprof.StopCPUProfile()
 		// //trace.Stop()
 		// tracefile.Close()
