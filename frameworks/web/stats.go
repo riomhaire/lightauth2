@@ -72,6 +72,22 @@ func (r *RestAPI) metricsToPrometheus(metrics *stats.Data) string {
 	buffer.WriteString(fmt.Sprintf("lightauth2_response_total_count %v\n", calls))
 	buffer.WriteString("\n")
 
+	rates := r.MetricsRegistry.Current()
+	buffer.WriteString("# HELP lightauth2_response_rate_per_second Requests/Second \n")
+	buffer.WriteString("# TYPE lightauth2_response_rate_per_second guage\n")
+	buffer.WriteString(fmt.Sprintf("lightauth2_response_rate_per_second %v\n", rates.PerSecond))
+	buffer.WriteString("\n")
+
+	buffer.WriteString("# HELP lightauth2_response_rate_per_minute Requests/Minute \n")
+	buffer.WriteString("# TYPE lightauth2_response_rate_per_minute guage\n")
+	buffer.WriteString(fmt.Sprintf("lightauth2_response_rate_per_minute %v\n", rates.PerMinute))
+	buffer.WriteString("\n")
+
+	buffer.WriteString("# HELP lightauth2_response_rate_per_hour Requests/Hour \n")
+	buffer.WriteString("# TYPE lightauth2_response_rate_per_hour guage\n")
+	buffer.WriteString(fmt.Sprintf("lightauth2_response_rate_per_hour %v\n", rates.PerHour))
+	buffer.WriteString("\n")
+
 	buffer.WriteString(fmt.Sprintf("\n"))
 
 	return buffer.String()

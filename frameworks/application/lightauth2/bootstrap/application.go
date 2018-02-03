@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.5.1"
+const VERSION = "LightAuth2 Version 1.5.2"
 
 type Application struct {
 	registry *usecases.Registry
@@ -97,7 +97,9 @@ func (a *Application) Initialize() {
 	if configuration.KafkaMetrics {
 		negroni.UseFunc(restAPI.KafkaRecorder) // Record call in kafka
 	}
+
 	negroni.Use(restAPI.Statistics)
+	negroni.UseFunc(restAPI.RecordCall)       // Calculates per second/minute rates
 	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
 	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
 	negroni.UseFunc(restAPI.AddCoorsHeader)   // Add coors

@@ -16,12 +16,14 @@ type RestAPI struct {
 	Producer         sarama.SyncProducer
 	KafkaInitialized bool
 	IPAddress        string
+	MetricsRegistry  MetricsRegistry
 }
 
 func NewRestAPI(registry *usecases.Registry) RestAPI {
 	api := RestAPI{}
 	api.Registry = registry
 	api.Statistics = stats.New()
+	api.MetricsRegistry = MetricsRegistry{}
 
 	return api
 }
