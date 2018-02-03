@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/riomhaire/lightauth2/entities"
@@ -315,6 +316,45 @@ func TestStatisticsHandler(t *testing.T) {
 			t.Fatal(errors.New("Expected parameter missing"))
 		}
 
+	}
+
+}
+
+func TestPrometheusStatisticsHandler(t *testing.T) {
+	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
+	// pass 'nil' as the third parameter.
+	req, err := http.NewRequest("GET", "/api/v2/authentication/statistics", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Set Accept type to text
+	req.Header.Set("Accept", "text/plain")
+
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	rr := httptest.NewRecorder()
+	registry := createTestRegistry()
+	restAPI := NewRestAPI(&registry)
+	handler := http.HandlerFunc(restAPI.HandleStatistics)
+
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Read response and check has content
+	body := string(rr.Body.Bytes())
+	if len(body) == 0 {
+		t.Error("Expected String back but its empty")
+	}
+
+	// Check lightauth2_response_total_count present
+	if !strings.Contains(body, "lightauth2_response_total_count") {
+		t.Errorf("Expected 'lightauth2_response_total_count' but its not there. I got %v\n", body)
 	}
 
 }

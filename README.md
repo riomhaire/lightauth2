@@ -267,11 +267,11 @@ Example response is successful:
 
 On Error the appropriate Status code will be returned.
 
-### Get Call Statistics.
+### Get Call Metrics.
 
-Example GET request ("http://somehost:3030/api/v2/authentication/statistics"):
+Example GET request ("http://somehost:3030/api/v2/authentication/metrics"):
 
-No Bearer Authorization header is needed.
+No Bearer Authorization header is needed. If you make a request with 'application/json' accept type you will get:
 
 ```json
 {
@@ -292,6 +292,37 @@ No Bearer Authorization header is needed.
 	"average_response_time": "171.752µs",
 	"average_response_time_sec": 0.000171752
 }
+
+```
+
+If you want a prometheus acceptable response, then use the "text/plain" accept type and you will get something like:
+
+```text
+# HELP lightauth2_uptime_sec How many seconds app has been up.
+# TYPE lightauth2_uptime_sec counter
+lightauth2_uptime_sec 17.717113684
+
+# HELP lightauth2_total_response_time_sec Total time spent in handling requests.
+# TYPE lightauth2_total_response_time_sec counter
+lightauth2_total_response_time_sec 0.000838896
+
+# HELP lightauth2_average_response_time_sec Average time spent in handling requests.
+# TYPE lightauth2_average_response_time_sec guage
+lightauth2_average_response_time_sec 7.6263e-05
+
+# HELP lightauth2_response_status_200 Total Number of Requests returning http status 200
+# TYPE lightauth2_response_status_200 counter
+lightauth2_response_status_200 4
+
+# HELP lightauth2_response_status_404 Total Number of Requests returning http status 404
+# TYPE lightauth2_response_status_404 counter
+lightauth2_response_status_404 7
+
+# HELP lightauth2_response_total_count Total Number of Requests.
+# TYPE lightauth2_response_total_count counter
+lightauth2_response_total_count 11
+
+
 
 ```
 
