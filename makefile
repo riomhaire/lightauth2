@@ -6,15 +6,9 @@ dependencies:
 
 build: dependencies
 	@echo Compiling Apps
-	@echo   --- lightauth2 server
+	@echo   --- lightauth2 
 	@go build github.com/riomhaire/lightauth2/frameworks/application/lightauth2
 	@go install github.com/riomhaire/lightauth2/frameworks/application/lightauth2
-	@echo   --- lightauth2 session command
-	@go build github.com/riomhaire/lightauth2/frameworks/application/lightauthsession
-	@go install github.com/riomhaire/lightauth2/frameworks/application/lightauthsession
-	@echo   --- lightauth2 user command
-	@go build github.com/riomhaire/lightauth2/frameworks/application/lightauthuser
-	@go install github.com/riomhaire/lightauth2/frameworks/application/lightauthuser
 	@echo Done Compiling Apps
 
 test:
@@ -36,7 +30,7 @@ profile:
 clean:
 	@echo Cleaning
 	@go clean
-	@rm -f lightauth2 lightauthsession lightauthuser
+	@rm -f lightauth2
 	@rm -f coverage-*.html
 	@find . -name "debug.test" -exec rm -f {} \;
 

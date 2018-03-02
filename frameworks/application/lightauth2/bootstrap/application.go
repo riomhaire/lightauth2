@@ -1,75 +1,47 @@
 package bootstrap
 
 import (
-	"flag"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/riomhaire/lightauth2/frameworks"
 	"github.com/riomhaire/lightauth2/frameworks/web"
 	"github.com/riomhaire/lightauth2/interfaces"
 	"github.com/riomhaire/lightauth2/usecases"
+	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.5.3"
+const VERSION = "LightAuth2 Version 1.6"
 
 type Application struct {
 	registry *usecases.Registry
 	restAPI  *web.RestAPI
 }
 
-func (a *Application) Initialize() {
+func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	logger := frameworks.ConsoleLogger{}
 
 	logger.Log("INFO", "Initializing")
 	// Create Configuration
 	configuration := usecases.Configuration{}
-	sessionSecret := flag.String("sessionSecret", "secret", "Master key which is used to generate system jwt")
-	sessionPeriod := flag.Int("sessionPeriod", 3600, "How many seconds before sessions expires")
-	userFile := flag.String("usersFile", "users.csv", "List of Users and salted/hashed password with their roles")
-	useSSL := flag.Bool("useSSL", false, "If True Enable SSL Server support")
-	enableProfiling := flag.Bool("profile", false, "Enable profiling endpoint")
-	serverCert := flag.String("serverCert", "server.crt", "Server Cert File")
-	serverKey := flag.String("serverKey", "server.key", "Server Key File")
 
-	port := flag.Int("port", 3030, "Port to use")
-
-	enableKafkaLogging := flag.Bool("kafkaLogging", false, "Enable logging to Kafka")
-	enableKafkaMetrics := flag.Bool("kafkaMetrics", false, "Enable metrics to Kafka")
-	kafkaHost := flag.String("kafkaHost", "localhost", "Where Kafka is running")
-	kafkaPort := flag.Int("kafkaPort", 9092, "Port where Kafka is listening")
-	kafkaLoggingTopic := flag.String("kafkaLoggingTopic", "lightauth-logging", "Logging topic")
-	kafkaMetricsTopic := flag.String("kafkaMetricsTopic", "lightauth-metrics", "Metrics topic")
-
-	flag.Parse()
 	// Set in config
 	configuration.Application = "Authentication"
 	configuration.Version = VERSION
-	configuration.SigningSecret = *sessionSecret
-	configuration.TokenTimeout = *sessionPeriod
-	configuration.Store = *userFile
-	configuration.SSL = *useSSL
-	configuration.Profiling = *enableProfiling
-	configuration.SSLCertificate = *serverCert
-	configuration.SSLKey = *serverKey
-	configuration.Port = *port
-	configuration.KafkaLogging = *enableKafkaLogging
-	configuration.KafkaMetrics = *enableKafkaMetrics
-	configuration.KafkaHost = *kafkaHost
-	configuration.KafkaPort = *kafkaPort
-	configuration.KafkaLoggingTopic = *kafkaLoggingTopic
-	configuration.KafkaMetricsTopic = *kafkaMetricsTopic
-
+	configuration.SigningSecret = cmd.Flag("sessionSecret").Value.String()
+	configuration.TokenTimeout, _ = strconv.Atoi(cmd.Flag("sessionPeriod").Value.String())
+	configuration.Store = cmd.Flag("usersFile").Value.String()
+	configuration.SSL, _ = strconv.ParseBool(cmd.Flag("useSSL").Value.String())
+	configuration.Profiling, _ = strconv.ParseBool(cmd.Flag("profile").Value.String())
+	configuration.SSLCertificate = cmd.Flag("serverCert").Value.String()
+	configuration.SSLKey = cmd.Flag("serverKey").Value.String()
+	configuration.Port, _ = strconv.Atoi(cmd.Flag("port").Value.String())
 	registry := usecases.Registry{}
 	a.registry = &registry
 	registry.Configuration = configuration
-	if configuration.KafkaLogging {
-		registry.Logger = frameworks.NewKafkaLogger(configuration.KafkaHost, configuration.KafkaPort, configuration.KafkaLoggingTopic)
-		logger.Log("Configuration", fmt.Sprintf("Using Kafa for logging. Server [%v:%v] Topic [%v]", configuration.KafkaHost, configuration.KafkaPort, configuration.KafkaLoggingTopic))
-	} else {
-		registry.Logger = logger
-	}
+	registry.Logger = logger
 	database := frameworks.NewCSVReaderDatabaseInteractor(&registry)
 
 	registry.StorageInteractor = database

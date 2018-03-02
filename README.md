@@ -18,16 +18,37 @@ $ go get ./...
 
 There are three applications - the server is in the 'lightauth2' directory, a session generation application (useful for generating API tokens with roles such as admin), and a 'user' app for creating users suitable for including in the users.csv file (similar to passwd). 
 
-The best way if you just want run is to build and install the apps:
+The best way if you just want run is to build and install the app:
 
 ```bash
  go install github.com/riomhaire/lightauth2/frameworks/application/lightauth2
- go install github.com/riomhaire/lightauth2/frameworks/application/lightauthsession
- go install github.com/riomhaire/lightauth2/frameworks/application/lightauthuser
 
 ```
 
 ## Getting Started
+
+The lightauth2 application now consists on one application (was three: server, user and session) which understands four commands:
+
+```bash
+$ lightauth2 -h
+lightauth2 is an authentication server and session key generator
+
+Usage:
+  lightauth2 [flags]
+  lightauth2 [command]
+
+Available Commands:
+  help        Help about any command
+  serve       Starts an authentication server
+  session     Create a session key suitable for accessing a resource.
+  user        Create a user record and signed/encrypted password info for including in your user store.
+  version     Returns application version
+
+Flags:
+  -h, --help   help for lightauth2
+
+Use "lightauth2 [command] --help" for more information about a command.
+```
 
 
 ### User Creation Application
@@ -47,55 +68,50 @@ admin,50b911deac5df04e0a79ef18b04b29b245b8f576dcb7e5cca5937eb2083438ba,true,admi
 
 ```
 
-The password is hashed based on a secret and a salt.  To add a user you need to use the 'lightauthuser' application which takes parameters and creates a line suitable to append to the user csv file:
+The password is hashed based on a secret and a salt.  To add a user you need to use the lightauth2 'user' command which takes parameters and creates a line suitable to append to the user csv file:
 
 ```bash
-$ lightauth2 --help
-Usage of lightauth2:
-  -port int
-        Port to use (default 3030)
-  -profile
-        Enable profiling endpoint
-  -serverCert string
-        Server Cert File (default "server.crt")
-  -serverKey string
-        Server Key File (default "server.key")
-  -sessionPeriod int
-        How many seconds before sessions expires (default 3600)
-  -sessionSecret string
-        Master key which is used to generate system jwt (default "secret")
-  -useSSL
-        If True Enable SSL Server support
-  -usersFile string
-        List of Users and salted/hashed password with their roles (default "users.csv")
+$lightauth2 user -h
 
+Usage:
+  lightauth2 user [flags]
+
+Flags:
+      --claim1 string     Security Claim - Eg QRCode Hash
+      --claim2 string     Security Claim - Eg API Key
+  -h, --help              help for user
+  -p, --password string   Password (in the raw - will be encoded).
+  -r, --roles string      List of roles separated by ':'. (default "guest:public")
+  -u, --user string       Username associated with the token. (default "anonymous")
 ```
 
 ### Session Creation Application
 
 If a session token is created via the authenticate method they have a limited life span (usually 3600 seconds) before they become invalid. Tokens for api's typically have a requirement for a longer lived period - sometimes months or longer. Long lived Tokens need not be stored within the sessions file since they only need to be encoded using the same parameters as used by the lightauth server itself. 
 
-The session token creation application is called 'lightauthsession':
+The session token creation is done via the session command of lightauth:
 
 ```bash
-$ lightauthsession --help
-Usage of lightauthsession:
-  -roles string
-        List of roles separated by ':' (default "guest:public")
-  -secret string
-        Key used to generate sessions (default "secret")
-  -sessionPeriod int
-        How many seconds before sessions expires (default 3600)
-  -token string
-        If populated means decode token
-  -user string
-        Username associated with the token (default "anonymous")
+$ lightauth2 session -h
+Create a session key suitable for accessing a resource.
+
+Usage:
+  lightauth2 session [flags]
+
+Flags:
+  -h, --help                help for session
+  -r, --roles string        List of roles separated by ':'. (default "guest:public")
+  -s, --secret string       Secret used to sign things. (default "secret")
+  -k, --sessionPeriod int   How long session  will be active for. (default 3600)
+  -t, --token string        If populated means decode token
+  -u, --user string         Username associated with the token. (default "anonymous")
+
 ```
 
 An example usage would be:
 
 ```bash
- $ lightauthsession -user someapp -roles "api:admin" -sessionPeriod 9999999 -secret hush
+ $ lightauth2 session --user someapp --roles "api:admin" --sessionPeriod 9999999 --secret hush
 
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MTUxNTYzMTIsImppZCI6IjJiM2ZhYjcwLTA3M2MtNGRiNi05ZTEwLThlOWJlMTQwZWM5NCIsInJvbGVzIjpbImFwaSIsImFkbWluIl0sInN1YiI6InNvbWVhcHAifQ.dmsHOMzspru-HBL7QsuLILhFuEOlNSXMksVUismFi8U
 ```
@@ -110,30 +126,30 @@ The lightauth2 is a single server which includes authentication and session toke
 The server can be started with the following parameters:
 
 ```bash
-$ lightauth2 --help
-Usage of lightauth:
-  -port int
-        Port to use (default 3030)
-  -profile
-        Enable profiling endpoint
-  -serverCert string
-        Server Cert File (default "server.crt")
-  -serverKey string
-        Server Key File (default "server.key")
-  -sessionPeriod int
-        How many seconds before sessions expires (default 3600)
-  -sessionSecret string
-        Master key which is used to generate system jwt (default "secret")
-  -useSSL
-        If True Enable SSL Server support
-  -usersFile string
-        List of Users and salted/hashed password with their roles (default "users.csv")
+$lightauth2 serve -h
+Starts an authentication server on the given port and using given
+               secret based on users stored in a predefined location - by default a csv file.
+
+Usage:
+  lightauth2 serve [flags]
+
+Flags:
+  -h, --help                   help for serve
+  -p, --port int               Default Port to Listen to. (default 3030)
+      --profile                Enable Profiling.
+      --serverCert string      Server SSL Cert File  (default "server.crt")
+      --serverKey string       Server SSL Key File  (default "server.key")
+  -k, --sessionPeriod int      How long session returned will be active for. (default 3600)
+  -s, --sessionSecret string   Secret used to sign things. (default "secret")
+      --useSSL                 Use SSL
+  -u, --usersFile string       If User File used this is the one to use. (default "users.csv")
+
 
 ```
 The parameters are pretty much self evident. An example startup would produce:
 
 ```bash
-$ lightauth2 -usersFile ../../ansible/users.csv
+$ lightauth2  serve --usersFile ../../ansible/users.csv
 2017/10/11 18:45:05 [INFO] Initializing
 2017/10/11 18:45:05 Reading User Database ../../ansible/users.csv
 2017/10/11 18:45:05 #Number of users = 2

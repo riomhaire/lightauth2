@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/riomhaire/lightauth2/frameworks/application/lightauth2/bootstrap"
+	"github.com/riomhaire/lightauth2/frameworks/application/lightauth2/cmd"
 )
 
 func check(e error) {
@@ -32,10 +32,5 @@ func main() {
 		// tracefile.Close()
 		os.Exit(0)
 	}()
-
-	application := bootstrap.Application{}
-
-	application.Initialize()
-	application.Run()
-
+	cmd.Execute()
 }
