@@ -28,17 +28,17 @@ func NewUserAPIInteractor(registry *usecases.Registry) UserAPIInteractor {
 func (d UserAPIInteractor) Lookup(username string) (entities.User, error) {
 	target := fmt.Sprintf("%v/api/v1/user/account/%v", d.registry.Configuration.UserAPIHost, username)
 	token := d.registry.Configuration.UserAPIKey
-	d.registry.Logger.Log("INFO", fmt.Sprintf("Requesting '%v' from '%v'", username, target))
+	d.registry.Logger.Log(usecases.Trace, fmt.Sprintf("Requesting '%v' from '%v'", username, target))
 	resp, err := resty.R().SetHeader("Accept", "application/json").SetAuthToken(token).Get(target)
 	user := entities.User{}
 	if err != nil {
-		d.registry.Logger.Log("ERROR", err.Error())
+		d.registry.Logger.Log(usecases.Error, err.Error())
 		return user, err
 	}
 	// Decode
 	err = json.Unmarshal(resp.Body(), &user)
 	if err != nil {
-		d.registry.Logger.Log("ERROR", err.Error())
+		d.registry.Logger.Log(usecases.Error, err.Error())
 	}
 	return user, err
 }

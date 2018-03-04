@@ -3,6 +3,8 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/riomhaire/lightauth2/usecases"
 )
 
 func (r *RestAPI) HandleValidate(w http.ResponseWriter, req *http.Request) {
@@ -20,7 +22,7 @@ func (r *RestAPI) HandleValidate(w http.ResponseWriter, req *http.Request) {
 	// Decode result
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if err != nil {
-		r.Registry.Logger.Log("ERROR", err.Error())
+		r.Registry.Logger.Log(usecases.Error, err.Error())
 		w.WriteHeader(http.StatusUnauthorized) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err.Error()); err != nil {
 			panic(err)
@@ -45,7 +47,7 @@ func (r *RestAPI) HandleTokenDecode(w http.ResponseWriter, req *http.Request) {
 	// Decode result
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if err != nil {
-		r.Registry.Logger.Log("ERROR", err.Error())
+		r.Registry.Logger.Log(usecases.Error, err.Error())
 		w.WriteHeader(http.StatusUnauthorized) // unprocessable entity
 		json.NewEncoder(w).Encode(err.Error())
 	} else {
