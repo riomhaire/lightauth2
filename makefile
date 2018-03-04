@@ -17,14 +17,9 @@ test:
 
 profile:
 	@echo Profiling Code
-	@go test -coverprofile coverage.out  github.com/riomhaire/lightauth2/frameworks/web 
-	@go tool cover -html=coverage.out -o coverage-web.html
-	@go test -coverprofile coverage.out  github.com/riomhaire/lightauth2/interfaces 
-	@go tool cover -html=coverage.out -o coverage-interfaces.html
-	@go test -coverprofile coverage.out  github.com/riomhaire/lightauth2/usecases
-	@go tool cover -html=coverage.out -o coverage-usecases.html
-	@go test -coverprofile coverage.out  github.com/riomhaire/lightauth2/entities
-	@go tool cover -html=coverage.out -o coverage-entities.html
+	@go get -u github.com/haya14busa/goverage 
+	@goverage -v -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
 	@rm coverage.out
 
 clean:
