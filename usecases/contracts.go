@@ -9,8 +9,16 @@ type AuthenticateInteractor interface {
 	AuthenticateClaims(user string, claims []string) (string, error)
 }
 
+const (
+	Error = 5
+	Warn  = 4
+	Info  = 3
+	Debug = 2
+	Trace = 1
+)
+
 type Logger interface {
-	Log(level, message string)
+	Log(level int, message string)
 }
 
 type TokenInteractor interface {

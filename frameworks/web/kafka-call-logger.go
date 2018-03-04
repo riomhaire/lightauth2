@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/riomhaire/lightauth2/usecases"
 	"github.com/urfave/negroni"
 )
 
@@ -28,7 +29,7 @@ func (r *RestAPI) KafkaRecorder(response http.ResponseWriter, request *http.Requ
 		broker := fmt.Sprintf("%v:%v", r.Registry.Configuration.KafkaHost, r.Registry.Configuration.KafkaPort)
 		brokers := []string{broker}
 		msg := fmt.Sprintf("Connecting to Kafka Broker at %v", broker)
-		r.Registry.Logger.Log("INFO", msg)
+		r.Registry.Logger.Log(usecases.Trace, msg)
 		producer, err := sarama.NewSyncProducer(brokers, config)
 		if err != nil {
 			panic(err)
