@@ -3,6 +3,7 @@ package frameworks
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -32,9 +33,9 @@ func NewCSVReaderDatabaseInteractor(registry *usecases.Registry) CSVReaderDataba
 	d.db = make(map[string]entities.User)
 	d.registry = registry
 
-	log.Printf("Reading User Database %s\n", registry.Configuration.Store)
+	registry.Logger.Log(usecases.Debug, fmt.Sprintf("Reading User Database %s\n", registry.Configuration.Store))
 	d.db, _ = loadUsers(registry.Configuration.Store)
-	log.Printf("#Number of users = %v\n", len(d.db))
+	registry.Logger.Log(usecases.Debug, fmt.Sprintf("#Number of users = %v\n", len(d.db)))
 	return d
 }
 

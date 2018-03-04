@@ -23,6 +23,7 @@ type Configuration struct {
 	UserAPI           bool
 	UserAPIKey        string
 	UserAPIHost       string
+	LoggingLevel      string
 }
 
 type Registry struct {
@@ -34,7 +35,7 @@ type Registry struct {
 }
 
 func (c *Configuration) String() string {
-	return fmt.Sprintf("\nCONFIGURATION\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n",
+	return fmt.Sprintf("\nCONFIGURATION\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n\t%15s : '%v'\n",
 		"Application",
 		c.Application,
 		"SigningSecret",
@@ -51,5 +52,7 @@ func (c *Configuration) String() string {
 		c.UserAPI,
 		"UserAPIHost",
 		c.UserAPIHost,
+		"LoggingLevel",
+		c.LoggingLevel,
 	)
 }

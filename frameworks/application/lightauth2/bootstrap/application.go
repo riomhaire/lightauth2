@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.7"
+const VERSION = "LightAuth2 Version 1.7.1"
 
 type Application struct {
 	registry *usecases.Registry
@@ -21,9 +21,9 @@ type Application struct {
 }
 
 func (a *Application) Initialize(cmd *cobra.Command, args []string) {
-	logger := frameworks.ConsoleLogger{}
+	logger := frameworks.NewConsoleLogger(cmd.Flag("loggingLevel").Value.String())
 
-	logger.Log("INFO", "Initializing")
+	logger.Log(usecases.Info, "Initializing")
 	// Create Configuration
 	configuration := usecases.Configuration{}
 
@@ -41,6 +41,7 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	configuration.UserAPI, _ = strconv.ParseBool(cmd.Flag("useUserAPI").Value.String())
 	configuration.UserAPIHost = cmd.Flag("userAPIHost").Value.String()
 	configuration.UserAPIKey = cmd.Flag("userAPIKey").Value.String()
+	configuration.LoggingLevel = cmd.Flag("loggingLevel").Value.String()
 
 	registry := usecases.Registry{}
 	a.registry = &registry
@@ -93,7 +94,7 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 }
 
 func (a *Application) Run() {
-	a.registry.Logger.Log("INFO", fmt.Sprintf("Running %s", a.registry.Configuration.Version))
-	a.registry.Logger.Log("INFO", a.registry.Configuration.String())
+	a.registry.Logger.Log(usecases.Info, fmt.Sprintf("Running %s", a.registry.Configuration.Version))
+	a.registry.Logger.Log(usecases.Info, a.registry.Configuration.String())
 	a.restAPI.Negroni.Run(fmt.Sprintf(":%d", a.registry.Configuration.Port))
 }

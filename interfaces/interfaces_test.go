@@ -16,8 +16,8 @@ type TestLogger struct {
 }
 
 // Append to String - so can check if required
-func (d TestLogger) Log(level, message string) {
-	d.Buffer.WriteString(fmt.Sprintf("[%s] %s\n", level, message))
+func (d TestLogger) Log(level int, message string) {
+	d.Buffer.WriteString(fmt.Sprintf("[%v] %s\n", level, message))
 }
 
 func TestSuccessfulAuthenticate(t *testing.T) {

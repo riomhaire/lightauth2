@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/riomhaire/lightauth2/usecases"
 )
 
 type AuthenticateResponse struct {
@@ -37,7 +39,7 @@ func (r *RestAPI) HandleAuthenticate(w http.ResponseWriter, req *http.Request) {
 	// Decode result
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if err != nil {
-		r.Registry.Logger.Log("ERROR", err.Error())
+		r.Registry.Logger.Log(usecases.Error, err.Error())
 		w.WriteHeader(http.StatusUnauthorized) // unprocessable entity
 		json.NewEncoder(w).Encode(err.Error())
 	} else {

@@ -64,5 +64,5 @@ func init() {
 	serveCmd.Flags().Bool("useUserAPI", false, "Use User API (see https://githib.com/riomhaire/lightauthuserapi")
 	serveCmd.Flags().String("userAPIKey", "", "The API Access Token Needed for User API")
 	serveCmd.Flags().String("userAPIHost", "", "The base endpoint where service resides")
-
+	serveCmd.Flags().StringP("loggingLevel", "l", "Debug", "Logging Level: Trace,Debug,Info,Warn,Error")
 }
