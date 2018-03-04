@@ -61,5 +61,8 @@ func init() {
 	serveCmd.Flags().String("serverCert", "server.crt", "Server SSL Cert File ")
 	serveCmd.Flags().String("serverKey", "server.key", "Server SSL Key File ")
 	serveCmd.Flags().Bool("useSSL", false, "Use SSL")
+	serveCmd.Flags().Bool("useUserAPI", false, "Use User API (see https://githib.com/riomhaire/lightauthuserapi")
+	serveCmd.Flags().String("userAPIKey", "", "The API Access Token Needed for User API")
+	serveCmd.Flags().String("userAPIHost", "", "The base endpoint where service resides")
 
 }
