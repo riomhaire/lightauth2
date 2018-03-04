@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.6"
+const VERSION = "LightAuth2 Version 1.7"
 
 type Application struct {
 	registry *usecases.Registry
@@ -38,11 +38,21 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	configuration.SSLCertificate = cmd.Flag("serverCert").Value.String()
 	configuration.SSLKey = cmd.Flag("serverKey").Value.String()
 	configuration.Port, _ = strconv.Atoi(cmd.Flag("port").Value.String())
+	configuration.UserAPI, _ = strconv.ParseBool(cmd.Flag("useUserAPI").Value.String())
+	configuration.UserAPIHost = cmd.Flag("userAPIHost").Value.String()
+	configuration.UserAPIKey = cmd.Flag("userAPIKey").Value.String()
+
 	registry := usecases.Registry{}
 	a.registry = &registry
 	registry.Configuration = configuration
 	registry.Logger = logger
-	database := frameworks.NewCSVReaderDatabaseInteractor(&registry)
+	var database usecases.StorageInteractor
+	if configuration.UserAPI {
+		database = frameworks.NewUserAPIInteractor(&registry)
+	} else {
+		// Default CSV
+		database = frameworks.NewCSVReaderDatabaseInteractor(&registry)
+	}
 
 	registry.StorageInteractor = database
 	registry.AuthenticateInteractor = interfaces.DefaultAuthenticateInteractor{&registry}
