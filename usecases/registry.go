@@ -1,6 +1,10 @@
 package usecases
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/riomhaire/lightauth2/frameworks/serviceregistry"
+)
 
 // Configuration containing data from the environment which is used to define program behaviour
 type Configuration struct {
@@ -24,14 +28,19 @@ type Configuration struct {
 	UserAPIKey        string
 	UserAPIHost       string
 	LoggingLevel      string
+	Host              string
+	Consul            bool
+	ConsulHost        string
+	ConsulId          string // ID of this client
 }
 
 type Registry struct {
-	Configuration          Configuration
-	Logger                 Logger
-	AuthenticateInteractor AuthenticateInteractor
-	StorageInteractor      StorageInteractor
-	TokenInteractor        TokenInteractor
+	Configuration           Configuration
+	Logger                  Logger
+	AuthenticateInteractor  AuthenticateInteractor
+	StorageInteractor       StorageInteractor
+	TokenInteractor         TokenInteractor
+	ExternalServiceRegistry serviceregistry.ServiceRegistry
 }
 
 func (c *Configuration) String() string {
