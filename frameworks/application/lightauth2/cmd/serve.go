@@ -65,4 +65,7 @@ func init() {
 	serveCmd.Flags().String("userAPIKey", "", "The API Access Token Needed for User API")
 	serveCmd.Flags().String("userAPIHost", "", "The base endpoint where service resides")
 	serveCmd.Flags().StringP("loggingLevel", "l", "Debug", "Logging Level: Trace,Debug,Info,Warn,Error")
+
+	serveCmd.Flags().StringP("consulHost", "t", "", "Host where consul resides usually something like http://consul:8500 ")
+	serveCmd.Flags().BoolP("consul", "c", false, "Enable consul support")
 }

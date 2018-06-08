@@ -3,9 +3,12 @@ package bootstrap
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/riomhaire/lightauth2/frameworks"
+	"github.com/riomhaire/lightauth2/frameworks/serviceregistry/consulagent"
+	"github.com/riomhaire/lightauth2/frameworks/serviceregistry/defaultserviceregistry"
 	"github.com/riomhaire/lightauth2/frameworks/web"
 	"github.com/riomhaire/lightauth2/interfaces"
 	"github.com/riomhaire/lightauth2/usecases"
@@ -13,7 +16,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.7.1"
+const VERSION = "LightAuth2 Version 1.8.1"
 
 type Application struct {
 	registry *usecases.Registry
@@ -42,6 +45,10 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	configuration.UserAPIHost = cmd.Flag("userAPIHost").Value.String()
 	configuration.UserAPIKey = cmd.Flag("userAPIKey").Value.String()
 	configuration.LoggingLevel = cmd.Flag("loggingLevel").Value.String()
+	hostname, _ := os.Hostname()
+	configuration.Host = hostname
+	configuration.Consul, _ = strconv.ParseBool(cmd.Flag("consul").Value.String())
+	configuration.ConsulHost = cmd.Flag("consulHost").Value.String()
 
 	registry := usecases.Registry{}
 	a.registry = &registry
@@ -58,6 +65,13 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	registry.StorageInteractor = database
 	registry.AuthenticateInteractor = interfaces.DefaultAuthenticateInteractor{&registry}
 	registry.TokenInteractor = interfaces.DefaultTokenInteractor{&registry}
+	// Do we need external registry
+	if configuration.Consul {
+		registry.ExternalServiceRegistry = consulagent.NewConsulServiceRegistry(&registry, "/api/v2/authentication", "/api/v2/authentication/health")
+
+	} else {
+		registry.ExternalServiceRegistry = defaultserviceregistry.NewDefaultServiceRegistry(&registry)
+	}
 
 	// Create API
 	restAPI := web.NewRestAPI(&registry)
@@ -69,8 +83,8 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 
 	// Add handlers
 	mux.HandleFunc("/api/v2/authentication", restAPI.HandleAuthenticate)
-	mux.HandleFunc("/api/v2/session", restAPI.HandleValidate)
-	mux.HandleFunc("/api/v2/session/decoder", restAPI.HandleTokenDecode)
+	mux.HandleFunc("/api/v2/authentication/session", restAPI.HandleValidate)
+	mux.HandleFunc("/api/v2/authentication/session/decoder", restAPI.HandleTokenDecode)
 	mux.HandleFunc("/api/v2/authentication/metrics", restAPI.HandleStatistics)
 	mux.HandleFunc("/metrics", restAPI.HandleStatistics)
 	mux.HandleFunc("/api/v2/authentication/health", restAPI.HandleHealth)
@@ -96,5 +110,12 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 func (a *Application) Run() {
 	a.registry.Logger.Log(usecases.Info, fmt.Sprintf("Running %s", a.registry.Configuration.Version))
 	a.registry.Logger.Log(usecases.Info, a.registry.Configuration.String())
+	// Register with external service if required ... default does nothing
+	a.registry.ExternalServiceRegistry.Register()
 	a.restAPI.Negroni.Run(fmt.Sprintf(":%d", a.registry.Configuration.Port))
+}
+
+func (a *Application) Stop() {
+	a.registry.Logger.Log(usecases.Info, "Shutting Down REST API")
+	a.registry.ExternalServiceRegistry.Deregister()
 }
