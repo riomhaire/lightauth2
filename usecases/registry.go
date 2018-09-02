@@ -32,6 +32,7 @@ type Configuration struct {
 	Consul            bool
 	ConsulHost        string
 	ConsulId          string // ID of this client
+	CacheTimeToLive   int    // Seconds which to cache responses from the user API. 0 = dont cache
 }
 
 type Registry struct {

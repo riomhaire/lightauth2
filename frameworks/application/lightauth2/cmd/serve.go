@@ -16,6 +16,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/riomhaire/lightauth2/frameworks/application/lightauth2/bootstrap"
 	"github.com/spf13/cobra"
@@ -36,6 +40,17 @@ var serveCmd = &cobra.Command{
 		application := bootstrap.Application{}
 
 		application.Initialize(cmd, args)
+		c := make(chan os.Signal, 2)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+		// Set up a way to cleanly shutdown / deregister
+		go func() {
+			<-c
+			log.Println("Shutting Down")
+			application.Stop()
+			os.Exit(0)
+		}()
+
 		application.Run()
 	},
 }
@@ -68,4 +83,7 @@ func init() {
 
 	serveCmd.Flags().StringP("consulHost", "t", "", "Host where consul resides usually something like http://consul:8500 ")
 	serveCmd.Flags().BoolP("consul", "c", false, "Enable consul support")
+
+	serveCmd.Flags().IntP("cacheTTL", "a", 0, "Default Cache Time To Live in Seconds. 0 = dont cache")
+
 }

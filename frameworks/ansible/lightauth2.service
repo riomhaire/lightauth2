@@ -3,7 +3,7 @@ Description=LightAuth2 Service
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/lightauth2 serve --usersFile /etc/lightauth/users.csv  --port 3030  
+ExecStart=/usr/bin/lightauth2 serve --usersFile /etc/lightauth/users.csv  --port 3030  --cacheTTL 300
 ExecStop=/usr/bin/killall lightauth2
 
 [Install]

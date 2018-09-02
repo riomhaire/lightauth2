@@ -16,7 +16,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.8.2"
+const VERSION = "LightAuth2 Version 1.8.5"
 
 type Application struct {
 	registry *usecases.Registry
@@ -49,6 +49,7 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	configuration.Host = hostname
 	configuration.Consul, _ = strconv.ParseBool(cmd.Flag("consul").Value.String())
 	configuration.ConsulHost = cmd.Flag("consulHost").Value.String()
+	configuration.CacheTimeToLive, _ = strconv.Atoi(cmd.Flag("cacheTTL").Value.String())
 
 	registry := usecases.Registry{}
 	a.registry = &registry
@@ -67,6 +68,7 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	registry.TokenInteractor = interfaces.DefaultTokenInteractor{&registry}
 	// Do we need external registry
 	if configuration.Consul {
+
 		registry.ExternalServiceRegistry = consulagent.NewConsulServiceRegistry(&registry, "/api/v2/authentication", "/api/v2/authentication/health")
 
 	} else {

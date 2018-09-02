@@ -7,8 +7,9 @@ dependencies:
 build: dependencies
 	@echo Compiling Apps
 	@echo   --- lightauth2 
-	@go build github.com/riomhaire/lightauth2/frameworks/application/lightauth2
-	@go install github.com/riomhaire/lightauth2/frameworks/application/lightauth2
+	@go build -ldflags="-s -w" github.com/riomhaire/lightauth2/frameworks/application/lightauth2
+	@upx  lightauth2
+	@cp lightauth2 ${GOPATH}/bin
 	@echo Done Compiling Apps
 
 test:
