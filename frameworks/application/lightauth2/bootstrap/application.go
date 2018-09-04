@@ -12,11 +12,12 @@ import (
 	"github.com/riomhaire/lightauth2/frameworks/web"
 	"github.com/riomhaire/lightauth2/interfaces"
 	"github.com/riomhaire/lightauth2/usecases"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.8.5"
+const VERSION = "LightAuth2 Version 1.8.6"
 
 type Application struct {
 	registry *usecases.Registry
@@ -102,7 +103,8 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
 	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
 	negroni.UseFunc(restAPI.AddCoorsHeader)   // Add coors
-	negroni.UseHandler(mux)
+	handler := cors.Default().Handler(mux)
+	negroni.UseHandler(handler)
 
 	// Stats runs across all instances
 	// n.UseFunc(AddWorkerHeader)
