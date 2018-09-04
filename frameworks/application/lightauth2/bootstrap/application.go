@@ -102,8 +102,7 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	negroni.UseFunc(restAPI.RecordCall)       // Calculates per second/minute rates
 	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
 	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
-	negroni.UseFunc(restAPI.AddCoorsHeader)   // Add coors
-	handler := cors.Default().Handler(mux)
+	handler := cors.Default().Handler(mux)    // Add coors
 	negroni.UseHandler(handler)
 
 	// Stats runs across all instances
