@@ -17,7 +17,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-const VERSION = "LightAuth2 Version 1.8.6"
+const VERSION = "LightAuth2 Version 1.8.7"
 
 type Application struct {
 	registry *usecases.Registry
@@ -102,7 +102,13 @@ func (a *Application) Initialize(cmd *cobra.Command, args []string) {
 	negroni.UseFunc(restAPI.RecordCall)       // Calculates per second/minute rates
 	negroni.UseFunc(restAPI.AddWorkerHeader)  // Add which instance
 	negroni.UseFunc(restAPI.AddWorkerVersion) // Which version
-	handler := cors.Default().Handler(mux)    // Add coors
+	handler := cors.New(
+		cors.Options{
+			AllowedOrigins:   []string{"*"},
+			AllowedMethods:   []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"},
+			AllowedHeaders:   []string{"*"},
+			AllowCredentials: true,
+		}).Handler(mux) // Add coors
 	negroni.UseHandler(handler)
 
 	// Stats runs across all instances
