@@ -29,14 +29,28 @@ func DecodeToken(tokenString, secret string) (entities.Token, error) {
 	session := entities.Token{}
 	session.Id = tokenString
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		session.User = claims["sub"].(string)
-		session.Expires = int64(claims["exp"].(float64))
+		session.User = "unknown"
+		session.Expires = -1
 		roles := make([]string, 0)
-		croles := claims["roles"].([]interface{})
-		for _, v := range croles {
-			roles = append(roles, v.(string))
+
+		// Get user (if exists)
+		if val, ok := claims["sub"]; ok {
+			session.User = val.(string)
 		}
-		session.Roles = roles
+
+		// Get Expires (if exists)
+		if _, ok := claims["exp"]; ok {
+			session.Expires = int64(claims["exp"].(float64))
+		}
+
+		// Get Roles (if exists)
+		if _, ok := claims["roles"]; ok {
+			croles := claims["roles"].([]interface{})
+			for _, v := range croles {
+				roles = append(roles, v.(string))
+			}
+			session.Roles = roles
+		}
 	}
 	return session, nil
 }
